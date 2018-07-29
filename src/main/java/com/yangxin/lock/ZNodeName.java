@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
  * @author leon on 2018/7/27.
  * @version 1.0
  * @Description: 表示一个ephemeral znode名称，该名称具有序列号并且可以按顺序排序
+ * 名称和序列号之间用连接符‘-’隔开
  */
 class ZNodeName implements Comparable<ZNodeName>{
     private final String name;
@@ -43,10 +44,49 @@ class ZNodeName implements Comparable<ZNodeName>{
         if (this == o){
             return true;
         }
+        if (o == null || getClass() != o.getClass()){
+            return false;
+        }
+
+        ZNodeName sequence = (ZNodeName) o;
+
+        if (!name.equals(sequence.name)){
+            return false;
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode(){
+        return name.hashCode() + 37;
     }
 
     @Override
     public int compareTo(ZNodeName o) {
-        return 0;
+        int s1 = this.sequence;
+        int s2 = o.sequence;
+        if (s1 == -1 && s2 == -1){
+            return this.name.compareTo(o.name);
+        }
+        if (s1 == -1){
+            return -1;
+        }else if (s2 == -1){
+            return 1;
+        }else {
+            return s1 - s2;
+        }
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getZodeName() {
+        return sequence;
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 }
