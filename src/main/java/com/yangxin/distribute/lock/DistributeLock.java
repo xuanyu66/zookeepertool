@@ -1,4 +1,4 @@
-package com.yangxin.lock;
+package com.yangxin.distribute.lock;
 
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.ACL;
@@ -6,6 +6,8 @@ import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -83,8 +85,7 @@ public class DistributeLock extends ProtocolSupport{
             } catch (KeeperException.NoNodeException e){
             } catch (KeeperException e){
                 LOGGER.error("Caught: {}", e);
-                throw (RuntimeException) new RuntimeException(e.getMessage()).
-                        initCause(e);
+                throw (RuntimeException) new RuntimeException(e.getMessage(), e);
             } finally {
                 if (callback != null){
                     callback.lockReased();
@@ -127,6 +128,7 @@ public class DistributeLock extends ProtocolSupport{
                 }
             }
             if(id == null) {
+                LOGGER.debug("prefix: {}", prefix);
                 id = zooKeeper.create(dir + "/" + prefix, data, getAcl(),
                         CreateMode.EPHEMERAL_SEQUENTIAL);
                 LOGGER.debug("Created id: {}", id);
@@ -137,8 +139,15 @@ public class DistributeLock extends ProtocolSupport{
         public boolean excute () throws KeeperException, InterruptedException {
             do {
                 if (id == null) {
-                    long sessionId = zooKeeper.getSessionId();
-                    String prefix = "x-" + sessionId + "-";
+                    String addr = null;
+                    String sessionId = Long.toHexString(zooKeeper.getSessionId());
+                    try {
+                        addr = InetAddress.getLocalHost().getHostAddress();
+                    } catch (UnknownHostException e) {
+                        e.printStackTrace();
+                    }
+                    LOGGER.debug(addr);
+                    String prefix = "x-" + addr + "-" + sessionId + "-";
                     findPrefixInChildern(prefix, zooKeeper, dir);
                     idName = new ZNodeName(id);
                 }

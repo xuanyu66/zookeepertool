@@ -1,4 +1,4 @@
-package com.yangxin.lock;
+package com.yangxin.distribute.lock;
 
 /**
  * @author leon on 2018/7/27.

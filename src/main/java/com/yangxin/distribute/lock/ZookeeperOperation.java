@@ -1,4 +1,4 @@
-package com.yangxin.lock;
+package com.yangxin.distribute.lock;
 
 import org.apache.zookeeper.KeeperException;
 /**
